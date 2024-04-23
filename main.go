@@ -19,6 +19,7 @@ func main() {
 		Issuer:    "tg-sb.com",
 		IssuedAt:  time.Now().UTC().Unix(),
 		ExpiresAt: time.Now().Add(time.Minute * 2).UTC().Unix(),
+		Audience:  "the-recepients-the-token-is-intended-for",
 	})
 	tokenString, err := newToken.SignedString(rsaKeys.PrivateKey)
 	if err != nil {
