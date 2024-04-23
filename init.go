@@ -1,6 +1,9 @@
 package main
 
-import keys "tylerjgabb/tg-sb-auth/lib"
+import (
+	"fmt"
+	keys "tylerjgabb/tg-sb-auth/lib"
+)
 
 var rsaKeys *keys.Keys
 
@@ -12,4 +15,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("RSA keys loaded\n")
+	fmt.Println("Public key JWK: ", string(rsaKeys.PublicKeyJwkJson))
+	fmt.Println("My public key JWK: ", string(rsaKeys.MyPublicKeyJson))
 }
