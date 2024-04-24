@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	keys "tylerjgabb/tg-sb-auth/lib"
 )
 
@@ -15,6 +14,4 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("RSA keys loaded")
-	fmt.Println("for /.well-known/jwks.json: ", string(rsaKeys.WellKnownJwks))
 }

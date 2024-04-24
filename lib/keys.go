@@ -33,6 +33,7 @@ func wellKnownJwksJson(publicKey *rsa.PublicKey) ([]byte, error) {
 		Algorithm: string(jose.RS256),
 		Use:       "sig",
 	}
+
 	jwkSet := jose.JSONWebKeySet{Keys: []jose.JSONWebKey{publicKeyJwk}}
 	jwkSetJson, err := json.MarshalIndent(jwkSet, "", "  ")
 	if err != nil {
