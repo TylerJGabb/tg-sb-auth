@@ -1,11 +1,8 @@
 package keys
 
 import (
-	"bytes"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/base64"
-	"encoding/binary"
 	"encoding/json"
 	"encoding/pem"
 	"os"
@@ -15,19 +12,9 @@ import (
 
 type parser func([]byte) (any, error)
 type Keys struct {
-	PrivateKey       *rsa.PrivateKey
-	PublicKey        *rsa.PublicKey
-	PublicKeyJwkJson []byte
-	MyPublicKeyJson  []byte
-}
-
-type MyJwk struct {
-	N       string `json:"n"`
-	E       string `json:"e"`
-	KeyId   string `json:"kid"`
-	Alg     string `json:"alg"`
-	KeyType string `json:"kty"`
-	Use     string `json:"use"`
+	PrivateKey    *rsa.PrivateKey
+	PublicKey     *rsa.PublicKey
+	WellKnownJwks []byte
 }
 
 func parseKey(filePath string, parser parser) (any, error) {
@@ -39,38 +26,19 @@ func parseKey(filePath string, parser parser) (any, error) {
 	return parser(pem.Bytes)
 }
 
-func publicKeyJwkJson(publicKey *rsa.PublicKey) ([]byte, error) {
+func wellKnownJwksJson(publicKey *rsa.PublicKey) ([]byte, error) {
 	publicKeyJwk := jose.JSONWebKey{
 		Key:       publicKey,
 		KeyID:     "key-id",
 		Algorithm: string(jose.RS256),
 		Use:       "sig",
 	}
-
-	publicKeyJson, err := json.MarshalIndent(publicKeyJwk, "", "  ")
+	jwkSet := jose.JSONWebKeySet{Keys: []jose.JSONWebKey{publicKeyJwk}}
+	jwkSetJson, err := json.MarshalIndent(jwkSet, "", "  ")
 	if err != nil {
 		return nil, err
 	}
-	return publicKeyJson, nil
-}
-
-func publicKeyJwkJsonMine(publicKey *rsa.PublicKey) ([]byte, error) {
-	eData := make([]byte, 8)
-	binary.BigEndian.PutUint64(eData, uint64(publicKey.E))
-	publicKeyJwk := MyJwk{
-		N:       base64.RawURLEncoding.EncodeToString(publicKey.N.Bytes()),
-		E:       base64.RawURLEncoding.EncodeToString(bytes.TrimLeft(eData, "\x00")),
-		KeyId:   "TODO--- key-id ---TODO",
-		Alg:     "RS256",
-		KeyType: "RSA",
-		Use:     "sig",
-	}
-
-	publicKeyJson, err := json.MarshalIndent(publicKeyJwk, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	return publicKeyJson, nil
+	return jwkSetJson, nil
 }
 
 func LoadKeys(
@@ -85,19 +53,14 @@ func LoadKeys(
 	if err != nil {
 		return nil, err
 	}
-	publicKeyJwkJson, err := publicKeyJwkJson(publicKey.(*rsa.PublicKey))
-	if err != nil {
-		return nil, err
-	}
-	myPublicKeyJwkJson, err := publicKeyJwkJsonMine(publicKey.(*rsa.PublicKey))
+	publicKeyJwkJson, err := wellKnownJwksJson(publicKey.(*rsa.PublicKey))
 	if err != nil {
 		return nil, err
 	}
 
 	return &Keys{
-		PrivateKey:       privateKey.(*rsa.PrivateKey),
-		PublicKey:        publicKey.(*rsa.PublicKey),
-		PublicKeyJwkJson: publicKeyJwkJson,
-		MyPublicKeyJson:  myPublicKeyJwkJson,
+		PrivateKey:    privateKey.(*rsa.PrivateKey),
+		PublicKey:     publicKey.(*rsa.PublicKey),
+		WellKnownJwks: publicKeyJwkJson,
 	}, nil
 }

@@ -16,6 +16,5 @@ func init() {
 		panic(err)
 	}
 	fmt.Println("RSA keys loaded\n")
-	fmt.Println("Public key JWK: ", string(rsaKeys.PublicKeyJwkJson))
-	fmt.Println("My public key JWK: ", string(rsaKeys.MyPublicKeyJson))
+	fmt.Println("for /.well-known/jwks.json: ", string(rsaKeys.WellKnownJwks))
 }
