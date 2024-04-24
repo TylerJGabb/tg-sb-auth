@@ -15,6 +15,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("RSA keys loaded\n")
+	fmt.Println("RSA keys loaded")
 	fmt.Println("for /.well-known/jwks.json: ", string(rsaKeys.WellKnownJwks))
 }
